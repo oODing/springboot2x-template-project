@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="OFF">
+    <properties>
+        <!-- 配置日志路径 -->
+        <property name="CATALINA_BASE">./home/admin/taobao-tomcat-production-7.0.59.3/logs</property>
+    </properties>
+    <appenders>
+        <!-- 定义控制台输出 -->
+        <Console name="CONSOLE" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{20} - %msg%n"/>
+        </Console>
+        <!-- catalina.out -->
+        <RollingFile name="CATALINA_BASE_ROLLING" fileName="${CATALINA_BASE}/catalina.out"
+                     filePattern="${CATALINA_BASE}/catalina-%d{yyyy-MM-dd_HH-mm}.log"
+                     createOnDemand="true">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{20} - %m%n"/>
+            <Policies>
+                <!--根据date pattern确定interval的单位-->
+                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <!--删除策略,规则：只保留30天内的日志-->
+                <Delete basePath="${CATALINA_BASE}">
+                    <IfFileName glob="catalina-*.log"/>
+                    <IfLastModified age="P10M"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+        <!-- 错误日志-->
+        <RollingFile name="ROLLING_ERROR" fileName="${CATALINA_BASE}/error.log"
+                     filePattern="${CATALINA_BASE}/error-%d{yyyy-MM-dd}.log"
+                     createOnDemand="true">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{20} - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <!--删除策略,规则：只保留30天内的日志-->
+                <Delete basePath="${CATALINA_BASE}">
+                    <IfFileName glob="error-*.log"/>
+                    <IfLastModified age="P30D"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+            <Filters>
+                <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+        </RollingFile>
+    </appenders>
+    <loggers>
+        <root level="DEBUG">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="CATALINA_BASE_ROLLING"/>
+            <appender-ref ref="ROLLING_ERROR"/>
+        </root>
+        <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE"/>
+        <!--数据库日志-->
+        <logger name="com.apache.ibatis" level="TRACE"/>
+        <logger name="java.sql.Connection" level="DEBUG"/>
+        <logger name="java.sql.Statement" level="DEBUG"/>
+    </loggers>
+
+</configuration>
